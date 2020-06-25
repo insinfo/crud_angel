@@ -1,0 +1,8 @@
+# Default server configuration.
+host: 127.0.0.1
+port: 3000
+postgres:
+  database_name: crud
+  username: postgres
+  password: s1sadm1n
+jwt_secret: "YUFDkh7jEzSNMt74yo9RHvmhSnCxGCJE"
