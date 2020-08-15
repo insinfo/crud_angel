@@ -1,4 +1,4 @@
-FROM google/dart:latest
+FROM google/dart:2.7.1
 
 COPY ./ ./
 
@@ -6,7 +6,7 @@ COPY ./ ./
 RUN pub get
 
 # Optionally build generaed sources.
-# RUN pub run build_runner build
+RUN pub run build_runner build
 
 # Set environment, start server
 ENV ANGEL_ENV=production

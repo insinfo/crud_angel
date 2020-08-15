@@ -1,5 +1,7 @@
 library crud_angel.src.routes;
 
+import 'dart:convert';
+
 import 'package:angel_framework/angel_framework.dart';
 import 'package:angel_orm/angel_orm.dart';
 import 'package:angel_static/angel_static.dart';
@@ -13,10 +15,13 @@ AngelConfigurer configureServer(FileSystem fileSystem) {
 
     app.get('/', (req, res) => res.render('hello'));
     //lista pessoa
-    app.get('/pessoas', (req, res) {
+    app.get('/pessoas', (req, ResponseContext res) async {
       var executor = req.container.make<QueryExecutor>();
       var query = PessoaQuery();
-      return query.get(executor);
+
+      var ps = await query.get(executor);
+      res.headers['Content-Type'] = 'application/json; charset=utf-8';
+      res.write(jsonEncode(ps.map((f) => f.toJson()).toList()));
     });
     //cadastra pessoa
     app.post('/pessoas', (req, res) async {
@@ -31,7 +36,10 @@ AngelConfigurer configureServer(FileSystem fileSystem) {
         p.values.nome = req.bodyAsMap['nome'] as String;
         p.values.telefone = req.bodyAsMap['telefone'] as String;
         var query = p;
-        return await query.insert(executor);
+
+        var ps = await query.insert(executor);
+        res.headers['Content-Type'] = 'application/json; charset=utf-8';
+        res.write(jsonEncode(ps.toJson()));
       }
     });
     //update pessoa
@@ -47,15 +55,21 @@ AngelConfigurer configureServer(FileSystem fileSystem) {
         p.values.telefone = req.bodyAsMap['telefone'] as String;
         var query = p;
         query.where.id.equals(id);
-        return await query.update(executor);
+
+        var ps = await query.updateOne(executor);
+        res.headers['Content-Type'] = 'application/json; charset=utf-8';
+        res.write(jsonEncode(ps.toJson()));
       }
     });
     //obtem uma pessoa
-    app.get('/pessoas/:id', (req, res) {
+    app.get('/pessoas/:id', (req, res) async {
       var id = req.params['id'] as int;
       var executor = req.container.make<QueryExecutor>();
       var query = PessoaQuery()..where.id.equals(id);
-      return query.get(executor);
+
+      var ps = await query.getOne(executor);
+      res.headers['Content-Type'] = 'application/json; charset=utf-8';
+      res.write(jsonEncode(ps.toJson()));
     });
     //deleta uma lista de pessoas
     app.delete('/pessoas', (req, res) async {
@@ -72,7 +86,8 @@ AngelConfigurer configureServer(FileSystem fileSystem) {
         await query.delete(executor);
       }
 
-      return items;
+      res.headers['Content-Type'] = 'application/json; charset=utf-8';
+      res.write(items);
     });
 
     // Mount static server at web in development.
